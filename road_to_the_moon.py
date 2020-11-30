@@ -126,31 +126,36 @@ def divide_in_waves(total,waves):
         wave_list[waves-1] += bonus
     return wave_list
 
-def spawn_enemies(enemy_list,wave_list,wave,total_enemy_hp):
+def spawn_enemies(enemy_list,wave_list,wave,total_enemy_hp,enemy_type):
     if len(enemy_list) < 1 and enemy_cooldown == 0:
         wave += 1
         if wave < len(wave_list)+1:
             enemies = wave_list[wave-1]
             y = 560/(enemies+1)
+            if enemy_type == 'mover':
+                direction = 'up'
+            else:
+                direction = ''
             for w in range(enemies):
-                enemy_list.append([1000,10+y*(w+1),total_enemy_hp,y*(w+1)])
+                ogYpos = 10+y*(w+1)
+                enemy_list.append([1000,ogYpos,total_enemy_hp,ogYpos-45,ogYpos+45,direction])
     return enemy_list,wave
 
-def move_enemies(enemy_list, enemy_direction):
+def move_enemies(enemy_list):
     for e in range(len(enemy_list)):
         data = enemy_list[e]
         if data[0] > 650:
             data[0] -= 5
-        if enemy_direction == 'up':
-            data[1] -= 1.5
-        elif enemy_direction == 'down':
-            data[1] += 1.5
-        if data[1] < data[3]-45:
-            enemy_direction = 'down'
-        elif data[1] > data[3]+45:
-            enemy_direction = 'up'
+        if data[5] == 'up':
+            data[1] -= 1
+        elif data[5] == 'down':
+            data[1] += 1
+        if data[1] < data[3]:
+            data[5] = 'down'
+        elif data[1] > data[4]:
+            data[5] = 'up'
         enemy_list[e] = data
-    return enemy_list,enemy_direction
+    return enemy_list
 
 def spawn_laser(laser_list,location):
     laser_list.append([location[0]+100,location[1]+25])
@@ -265,7 +270,9 @@ def draw_particles(particles):
     return particles
 
 
+pygame.display.set_icon(get_image(image_src+'window_icon.ico'))
 screen = pygame.display.set_mode((1000, 560))
+pygame.display.set_caption('Road to the Moon')
 
 bg_scrollX = 0
 
@@ -295,7 +302,6 @@ level_total_waves = [3,3,3,3,4,1,5,5,7,1]
 level_enemy_types = ['ufo','ufo','ufo','mover','mover','boss','ufo','mover','mover','boss']
 wave_list = []
 enemy_list = []
-enemy_direction = ''
 
 enemy_cooldown = 0
 enemy_shoot_cooldown = 120
@@ -397,10 +403,8 @@ while running:
             elif level == 10:
                 total_enemy_hp = 150
             total_lasers = 5
-        if level_enemy_types[level-1] == 'mover' and enemy_direction == '':
-            enemy_direction = 'up'
-        enemy_list, wave = spawn_enemies(enemy_list,wave_list,wave,total_enemy_hp)
-        enemy_list,enemy_direction = move_enemies(enemy_list,enemy_direction)
+        enemy_list, wave = spawn_enemies(enemy_list,wave_list,wave,total_enemy_hp, level_enemy_types[level-1])
+        enemy_list = move_enemies(enemy_list)
         #enemies shoot lasers
         if enemy_shoot_cooldown > 0 and len(enemy_list) > 0:
             enemy_shoot_cooldown -= 1
@@ -494,7 +498,6 @@ while running:
                 enemy_cooldown = 100
                 enemy_shoot_cooldown = 180
                 enemy_laser_list = []
-                enemy_direction = ''
                 wave = 0
                 shoot_cooldown = 0
                 pause = False
@@ -572,7 +575,6 @@ while running:
                     enemy_cooldown = 100
                     enemy_shoot_cooldown = 180
                     enemy_laser_list = []
-                    enemy_direction = ''
                     wave = 0
                     shoot_cooldown = 0
                     total_player_shots = 1
