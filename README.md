@@ -11,6 +11,7 @@ Source code and all needed data for my game made for the GitHub Game Off 2020.
 ## Change log
 
 11/30/2020: v.1.0.1 (Bug fixing with mover enemies' movement as well as adding an icon and title to the window).
+
 11/29/2020 : v.1.0.0 (Initial release).
 
 ---
