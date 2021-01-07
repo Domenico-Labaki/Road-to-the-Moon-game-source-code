@@ -94,7 +94,7 @@ def object_collision(object_list,object_hitboxes,objects_to_delete,particles,mat
             elif material == 'crystal':
                 color = (171, 0, 157)
             for p in range(random.randint(4,10)):
-                particles.append([[math.floor(player_hitbox[0]+player_hitbox[2]),math.floor(player_hitbox[1]+player_hitbox[3]/2)],[random.randint(-3,3),random.randint(-3,3)],100,color])
+                particles.append([[object_hitboxes[i][0]+object_hitboxes[i][2]/2,object_hitboxes[i][1]+object_hitboxes[i][3]/2],[random.randint(-3,3),random.randint(-3,3)],100,color])
             objects_to_delete.append(location)
             if material == 'meteor':
                 lives -= 1
@@ -269,6 +269,11 @@ def draw_particles(particles):
     particles_to_delete.clear()
     return particles
 
+def addlife(lives, add_count):
+    lives += add_count
+    if lives > 6:
+        lives -= lives-6
+    return lives
 
 pygame.display.set_icon(get_image(image_src+'window_icon.ico'))
 screen = pygame.display.set_mode((1000, 560))
@@ -327,7 +332,7 @@ won = False
 
 sound_src = r'.\sounds'+'/'
 
-player_shot = pygame.mixer.Sound(sound_src+'sfx_wpn_laser2.wav')
+player_shot = pygame.mixer.Sound(sound_src+'sfx_weapon_singleshot7.wav')
 enemy_shot = pygame.mixer.Sound(sound_src+'sfx_wpn_laser6.wav')
 catch_crystal = pygame.mixer.Sound(sound_src+'sfx_coin_double1.wav')
 player_gets_hit = pygame.mixer.Sound(sound_src+'sfx_sounds_damage1.wav')
@@ -337,7 +342,7 @@ enemy_dies = pygame.mixer.Sound(sound_src+'sfx_exp_shortest_soft1.wav')
 boss_dies = pygame.mixer.Sound(sound_src+'sfx_exp_long6.wav')
 button_click = pygame.mixer.Sound(sound_src+'sfx_menu_select2.wav')
 
-pygame.mixer.music.load('underclocked_eric_skiff.mp3')
+pygame.mixer.music.load(r'.\music\underclocked_eric_skiff.mp3')
 pygame.mixer.music.play(-1)
 
 running = True
@@ -369,14 +374,14 @@ while running:
         player_location,delay = move_player(player_location,delay)
         player_hitbox = pygame.Rect(player_location[0],player_location[1],100,50)
         #meteors
-        if wave < len(wave_list)+1 and meteor_check[level-1] == 1:
+        if wave < len(wave_list)+1 and meteor_check[level-1] == 1 and transition_timer == 0:
             object_spawn_cooldown, meteor_list = spawn_object(object_spawn_cooldown,meteor_list)
         meteor_list, meteors_to_delete = move_object(meteor_list, meteors_to_delete)
         material = 'meteor'
         meteor_hitboxes = rotate_object(meteor_list,material,angle)
         meteor_list, meteors_to_delete, particles = object_collision(meteor_list,meteor_hitboxes,meteors_to_delete,particles,material)
         #crystals
-        if wave < len(wave_list)+1:
+        if wave < len(wave_list)+1 and transition_timer == 0:
             object_spawn_cooldown, crystal_list = spawn_object(object_spawn_cooldown,crystal_list)
         crystal_list, crystals_to_delete = move_object(crystal_list,crystals_to_delete)
         material = 'crystal'
@@ -403,10 +408,11 @@ while running:
             elif level == 10:
                 total_enemy_hp = 150
             total_lasers = 5
-        enemy_list, wave = spawn_enemies(enemy_list,wave_list,wave,total_enemy_hp, level_enemy_types[level-1])
+        if transition_timer == 0:
+            enemy_list, wave = spawn_enemies(enemy_list,wave_list,wave,total_enemy_hp, level_enemy_types[level-1])
         enemy_list = move_enemies(enemy_list)
         #enemies shoot lasers
-        if enemy_shoot_cooldown > 0 and len(enemy_list) > 0:
+        if enemy_shoot_cooldown > 0 and len(enemy_list) > 0 and transition_timer == 0:
             enemy_shoot_cooldown -= 1
         if enemy_shoot_cooldown < 1 and len(enemy_list) > 0:
             enemy_shot.play()
@@ -481,19 +487,20 @@ while running:
         if wave > len(wave_list) and len(meteor_list) < 1 and len(crystal_list) < 1:
             if level < total_levels:
                 level +=1
-                if lives < 6:
-                    if level > 5:
-                        lives += 2
-                    else:
-                        lives += 1
+                if level > 9:
+                    lives = addlife(lives, 3)
+                elif level > 5:
+                    lives = addlife(lives, 2)
+                else:
+                    lives = addlife(lives, 1)
                 wave = 0
                 transition = str(level)
                 transitionY = 0
-                transition_timer = 90
+                transition_timer = 1
                 player_location[0] = -100
                 meteor_list = []
                 meteors_to_delete = []
-                object_spawn_cooldown = 300
+                object_spawn_cooldown = 120
                 enemy_list = []
                 enemy_cooldown = 100
                 enemy_shoot_cooldown = 180
@@ -530,9 +537,7 @@ while running:
     #transitions
     if transition != '':
         screen.blit(get_image(image_src+'transitions/'+transition+'.png'),(0,transitionY))
-        if transitionY == 0 and transition_timer > 0:
-            transition_timer -= 1
-        else:
+        if transition_timer == 0:
             transitionY += 10
         if transitionY > 560:
             transition = ''
@@ -541,6 +546,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_s:
+                transition_timer = 0
             if event.key == pygame.K_p and activity == 'playing':
                 button_click.play()
                 pause = not pause
@@ -563,13 +570,13 @@ while running:
                     lives = 6
                     transition = str(level)
                     transitionY = 0
-                    transition_timer = 60
+                    transition_timer = 1
                     angle = 0
                     player_location[0] = -100
                     delay = 0
                     meteor_list = []
                     meteors_to_delete = []
-                    object_spawn_cooldown = 300
+                    object_spawn_cooldown = 120
                     wave_list = divide_in_waves(level_total_enemies[level-1],level_total_waves[level-1])
                     enemy_list = []
                     enemy_cooldown = 100

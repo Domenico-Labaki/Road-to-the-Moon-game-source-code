@@ -1,0 +1,6 @@
+Sounds: https://opengameart.org/content/512-sound-effects-8-bit-style
+
+All sounds used in the game are from the pack linked above.
+
+These sound effects are licensed under CC0 Creative Commons license. You can do anything you want with these sounds.
+If you do want to give credit, please link back to the following URL: https://opengameart.org/content/512-sound-effects-8-bit-style
