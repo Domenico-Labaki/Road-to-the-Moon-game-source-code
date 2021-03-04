@@ -371,7 +371,8 @@ while running:
         angle += 1
         #player
         player_location = slide_in(player_location,75,6)
-        player_location,delay = move_player(player_location,delay)
+        if transition == '':
+                player_location,delay = move_player(player_location,delay)
         player_hitbox = pygame.Rect(player_location[0],player_location[1],100,50)
         #meteors
         if wave < len(wave_list)+1 and meteor_check[level-1] == 1 and transition_timer == 0:
@@ -438,7 +439,7 @@ while running:
             if total_player_shots < 3:
                 total_player_shots += 1
         pressed = pygame.key.get_pressed()
-        if shoot_cooldown < 1:
+        if shoot_cooldown < 1 and transition == '':
             if pressed[pygame.K_SPACE]:
                 player_shot.play()
                 laser_list = spawn_laser(laser_list,player_location)
@@ -560,7 +561,7 @@ while running:
                 pause = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             x, y = event.pos
-            if activity == 'menu':
+            if activity == 'menu' and transition == '':
                 if play_button.collidepoint(x, y):
                     button_click.play()
                     pause = False
