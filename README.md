@@ -11,8 +11,11 @@ Source code and all required material for my game made for the GitHub Game Off 2
 ## Change log
 
 2/1/2021: v.1.0.3 (Added text that clarifies transition instructions for some transitions that didn't have any, minor bug fixes).
+
 1/7/2021: v.1.0.2 (Changed player shooting sound, start level on key press, bug fixing with lives system, small transition graphical changes).
+
 11/30/2020: v.1.0.1 (Bug fixing with mover enemies' movement as well as adding an icon and title to the window).
+
 11/29/2020 : v.1.0.0 (Initial release).
 
 ---
